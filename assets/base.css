@@ -1,3 +1,19 @@
+@font-face {
+  font-family: Lustria;
+  font-weight: 400;
+  src: url('https://cdn.shopify.com/s/files/1/0749/7007/1208/files/Lustria-Regular.otf?v=1777969410');
+}
+@font-face {
+  font-family: Lustria;
+  font-weight: 400;
+  src: url('https://cdn.shopify.com/s/files/1/0749/7007/1208/files/Lustria-Regular.ttf?v=1777969410');
+}
+@font-face {
+  font-family: Lustria;
+  font-weight: 400;
+  src: url('https://cdn.shopify.com/s/files/1/0749/7007/1208/files/Lustria-Regular.woff2?v=1777969410');
+}
+
 * {
   box-sizing: border-box;
 }
@@ -4213,3 +4229,46 @@ product-recommendations:has([data-has-recommendations='false']) {
     translate: 0px var(--atc-destination, 0px);
   }
 }
+
+
+/************ CUSTOM HEADER STYLES START ***********/
+.custom-header-content{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+/************ CUSTOM HEADER STYLES END ***********/
+/************ PRODUCT GRID QUICK VIEW STYLES START ***********/
+.product-grid-quick-view__media,
+.product-grid-quick-view__content{
+  margin-top: 12px;
+}
+.product-grid-quick-view__title{
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: 0;
+  margin-bottom: 24px;
+}
+.product-grid-quick-view__price{
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  margin-bottom: 16px;
+  font-family: Lustria;
+}
+.product-grid-quick-view__description{
+  max-width: 146px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -1%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+/************ PRODUCT GRID QUICK VIEW STYLES END ***********/

@@ -1,0 +1,831 @@
+<section
+  class="custom-product-grid"
+  style="
+    --custom-product-grid-background: {{ section.settings.background_color }};
+    --custom-product-grid-columns: {{ section.settings.columns_desktop }};
+    --custom-product-grid-mobile-columns: {{ section.settings.columns_mobile }};
+    --custom-product-grid-gap: {{ section.settings.grid_gap }}px;
+    --custom-product-grid-heading-color: {{ section.settings.heading_color }};
+    --custom-product-grid-heading-size: {{ section.settings.heading_font_size }}px;
+    --custom-product-grid-heading-size-mobile: {{ section.settings.heading_font_size_mobile }}px;
+    --custom-product-grid-heading-alignment-mobile: {{ section.settings.heading_alignment_mobile }};
+    --custom-product-grid-heading-weight: {{ section.settings.heading_font_weight }};
+    --custom-product-grid-heading-line-height: {{ section.settings.heading_line_height | divided_by: 100.0 }};
+    --custom-product-grid-padding-top: {{ section.settings.padding_top }}px;
+    --custom-product-grid-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --custom-product-grid-quick-button-background: {{ section.settings.quick_button_background_color }};
+    --custom-product-grid-quick-button-color: {{ section.settings.quick_button_text_color }};
+  "
+>
+  <div class="custom-product-grid__inner custom-product-grid__inner--{{ section.settings.section_width }}">
+    {% if section.settings.heading != blank %}
+      <h2 class="custom-product-grid__heading custom-product-grid__heading--{{ section.settings.heading_alignment }}">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {% endif %}
+
+    <div class="custom-product-grid__items">
+      {% for block in section.blocks %}
+        {% liquid
+          assign product = block.settings.product
+          assign dialog_id = 'ProductGridQuickView-' | append: section.id | append: '-' | append: block.id
+        %}
+
+        <div
+          class="custom-product-grid__item"
+          {{ block.shopify_attributes }}
+        >
+          {% if product != blank %}
+            <div
+              class="custom-product-grid__media"
+              style="
+                --custom-product-grid-quick-button-top: {{ block.settings.quick_button_top }}%;
+                --custom-product-grid-quick-button-left: {{ block.settings.quick_button_left }}%;
+              "
+            >
+              {% if product.featured_image != blank %}
+                {{
+                  product.featured_image
+                  | image_url: width: 1000
+                  | image_tag:
+                    widths: '360, 540, 720, 900, 1000',
+                    sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw',
+                    alt: product.featured_image.alt | default: product.title,
+                    class: 'custom-product-grid__image',
+                    loading: 'lazy'
+                }}
+              {% else %}
+                {{ 'product-apparel-1' | placeholder_svg_tag: 'custom-product-grid__placeholder' }}
+              {% endif %}
+
+              <button
+                type="button"
+                class="custom-product-grid__quick-button"
+                aria-label="Open quick view for {{ product.title | escape }}"
+                aria-controls="{{ dialog_id }}"
+                data-product-grid-quick-view-open
+                data-product-grid-quick-view-target="{{ dialog_id }}"
+              >
+                +
+              </button>
+            </div>
+
+            {% render 'product-grid-quick-view',
+              product: product,
+              dialog_id: dialog_id,
+              button_style: section.settings.quick_view_button_style
+            %}
+          {% else %}
+            <div class="custom-product-grid__media custom-product-grid__media--empty">
+              {{ 'product-apparel-1' | placeholder_svg_tag: 'custom-product-grid__placeholder' }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .custom-product-grid {
+    background-color: var(--custom-product-grid-background);
+  }
+
+  .custom-product-grid__inner {
+    padding-block-start: var(--custom-product-grid-padding-top);
+    padding-block-end: var(--custom-product-grid-padding-bottom);
+  }
+
+  .custom-product-grid__inner--page-width {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .custom-product-grid__inner--full-width {
+    padding-inline: var(--page-margin);
+  }
+
+  .custom-product-grid__heading {
+    margin: 0 0 32px;
+    font-family: Lustria;
+    color: var(--custom-product-grid-heading-color);
+    font-size: var(--custom-product-grid-heading-size);
+    font-weight: var(--custom-product-grid-heading-weight);
+    line-height: var(--custom-product-grid-heading-line-height);
+    letter-spacing: 0;
+  }
+
+  .custom-product-grid__heading--left {
+    text-align: left;
+  }
+
+  .custom-product-grid__heading--center {
+    text-align: center;
+  }
+
+  .custom-product-grid__heading--right {
+    text-align: right;
+  }
+
+  .custom-product-grid__items {
+    display: grid;
+    grid-template-columns: repeat(var(--custom-product-grid-columns), minmax(0, 1fr));
+    gap: var(--custom-product-grid-gap);
+  }
+  .custom-product-grid__item{
+      height: 100%;
+      width: auto;
+  }
+  .custom-product-grid__item img{
+    object-fit: cover;
+    height: 100%;
+    object-position: center;
+  }
+
+  .custom-product-grid__media {
+    position: relative;
+    overflow: hidden;
+    background-color: rgb(var(--color-foreground-rgb) / 0.04);
+    aspect-ratio: 1;
+  }
+
+  .custom-product-grid__image,
+  .custom-product-grid__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .custom-product-grid__image {
+    object-fit: cover;
+  }
+
+  .custom-product-grid__placeholder {
+    object-fit: cover;
+  }
+
+  .custom-product-grid__quick-button {
+    position: absolute;
+    top: var(--custom-product-grid-quick-button-top);
+    left: var(--custom-product-grid-quick-button-left);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background-color: var(--custom-product-grid-quick-button-background);
+    color: var(--custom-product-grid-quick-button-color);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.9;
+    transform: translate(-50%, -50%);
+    transition: opacity var(--animation-speed) var(--animation-easing), transform var(--animation-speed) var(--animation-easing);
+  }
+
+  .custom-product-grid__quick-button:hover {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .custom-product-grid__quick-button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  .product-grid-quick-view {
+    width: 100%;
+    max-width: 311px;
+    max-height: calc(100svh - 32px);
+    padding: 0;
+    border: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    box-shadow: var(--shadow-popover);
+    padding: 0 12px 24px;
+  }
+
+  .product-grid-quick-view::backdrop {
+    background: rgb(0 0 0 / 0.48);
+  }
+
+  .product-grid-quick-view__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 12px;
+    padding: 24px 0 0;
+  }
+
+  .product-grid-quick-view__close {
+    position: absolute;
+    top: 12px;
+    right: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    border: 0;
+    background: transparent;
+    color: currentColor;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .product-grid-quick-view__media {
+    width: 120px;
+    height: 140px;
+    overflow: hidden;
+    background-color: rgb(var(--color-foreground-rgb) / 0.04);
+  }
+
+  .product-grid-quick-view__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-grid-quick-view__content {
+    align-self: start;
+  }
+
+  .product-grid-quick-view__form {
+    margin-block-start: 16px;
+  }
+
+  .product-grid-quick-view__variants {
+    display: grid;
+    gap: 14px;
+  }
+
+  .product-grid-quick-view__option {
+    display: grid;    
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .product-grid-quick-view__option-label {    
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: 0;
+    margin-bottom: 4px;
+  }
+
+  .product-grid-quick-view__color-options {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .product-grid-quick-view__color-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    border: 0.5px solid #000000;
+    cursor: pointer;
+    width: 50%;
+    transition: all var(--animation-speed) var(--animation-easing);
+  }
+  .product-grid-quick-view__color-label:nth-child(odd) {
+    border-right: 0;
+  }
+  .product-grid-quick-view__color-label:last-child{
+    border-right: 0.5px solid #000000;
+  }
+
+  .product-grid-quick-view__color-label:has(input:checked) {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .product-grid-quick-view__color-label input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .product-grid-quick-view__color-swatch {
+    width: 6px;
+    height: 100%;
+    border-right: 0.5px solid #000000;
+    background: var(--product-grid-quick-view-swatch);
+  }
+
+  .product-grid-quick-view__color-text {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .product-grid-quick-view__select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 36px 8px 12px;
+    border: 0.5px solid #000000;
+    border-radius: 0;
+    background-color: var(--color-background);
+    background-image: url("data:image/svg+xml,%3Csvg width='15' height='9' viewBox='0 0 15 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.06055 1.06067L7.06055 7.06067L13.0605 1.06067' stroke='black' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 15px 9px;
+    color: var(--color-foreground);
+  }
+  .product-grid-quick-view__select:focus-visible{
+    outline: none;
+  }
+
+  .product-grid-quick-view__select::-ms-expand {
+    display: none;
+  }
+
+  .product-grid-quick-view__option-error {
+    margin-block-start: 6px;
+    color: #b00020;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .product-grid-quick-view__add-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.28;
+    text-transform: uppercase;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 40px;
+    padding: 12px 22px;
+    border: 0;
+    background-color: var(--product-grid-quick-view-add-bg);
+    color: var(--product-grid-quick-view-add-text);
+    cursor: pointer;
+    transition: color var(--animation-speed) var(--animation-easing),
+    background-color var(--animation-speed) var(--animation-easing);
+  }
+
+  .product-grid-quick-view__add-button:hover {
+    background-color: var(--product-grid-quick-view-add-hover-bg);
+    color: var(--product-grid-quick-view-add-hover-text);
+  }
+
+  .product-grid-quick-view__add-button--primary {
+    --product-grid-quick-view-add-bg: #fff544;
+    --product-grid-quick-view-add-text: #000000;
+    --product-grid-quick-view-add-hover-bg: #000000;
+    --product-grid-quick-view-add-hover-text: #ffffff;
+  }
+
+  .product-grid-quick-view__add-button--secondary {
+    --product-grid-quick-view-add-bg: #000000;
+    --product-grid-quick-view-add-text: #ffffff;
+    --product-grid-quick-view-add-hover-bg: #fff544;
+    --product-grid-quick-view-add-hover-text: #000000;
+  }
+
+  .product-grid-quick-view__add-button svg {
+    flex-shrink: 0;
+    width: 26px;
+    height: 12px;
+  }
+
+  .product-grid-quick-view__add-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .custom-product-grid__heading {
+      font-size: var(--custom-product-grid-heading-size-mobile);
+      text-align: var(--custom-product-grid-heading-alignment-mobile);
+    }
+
+    .custom-product-grid__items {
+      grid-template-columns: repeat(var(--custom-product-grid-mobile-columns), minmax(0, 1fr));
+    }
+
+    .product-grid-quick-view__inner {
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 20px;
+      padding: 24px;
+    }
+
+    .product-grid-quick-view__content {
+      padding-inline-end: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  const getSelectedOptions = (form) =>
+    Array.from(
+      new Set(Array.from(form.querySelectorAll('[data-product-grid-option]')).map((input) => input.dataset.optionPosition))
+    )
+      .sort((first, second) => Number(first) - Number(second))
+      .map((position) => {
+        const inputs = Array.from(form.querySelectorAll(`[data-option-position="${position}"]`));
+        const checkedInput = inputs.find((input) => input.checked);
+
+        return checkedInput ? checkedInput.value : inputs[0]?.value;
+      });
+
+  const hasUnselectedQuickViewSize = (form) =>
+    Array.from(form.querySelectorAll('[data-product-grid-size-option]')).some((select) => select.value === '');
+
+  const updateQuickViewVariant = (form) => {
+    const variantsElement = form.querySelector('[data-product-grid-variants]');
+    const variantInput = form.querySelector('[data-product-grid-variant-id]');
+    const addButton = form.querySelector('[data-product-grid-add-button]');
+
+    if (!variantsElement || !variantInput || !addButton) return;
+
+    const variants = JSON.parse(variantsElement.textContent);
+    const selectedOptions = getSelectedOptions(form);
+    const selectedVariant = variants.find((variant) =>
+      variant.options.every((option, index) => option === selectedOptions[index])
+    );
+
+    if (!selectedVariant) {
+      const addButtonLabel = addButton.querySelector('[data-product-grid-add-button-label]');
+
+      if (hasUnselectedQuickViewSize(form)) {
+        addButton.disabled = false;
+        variantInput.value = '';
+
+        if (addButtonLabel) {
+          addButtonLabel.textContent = 'Add to cart';
+        }
+
+        return;
+      }
+
+      addButton.disabled = true;
+
+      if (addButtonLabel) {
+        addButtonLabel.textContent = 'Unavailable';
+      }
+
+      return;
+    }
+
+    variantInput.value = selectedVariant.id;
+    addButton.disabled = !selectedVariant.available;
+    const addButtonLabel = addButton.querySelector('[data-product-grid-add-button-label]');
+    if (addButtonLabel) {
+      addButtonLabel.textContent = selectedVariant.available ? 'Add to cart' : 'Sold out';
+    }
+  };
+
+  const validateQuickViewSize = (form) => {
+    const sizeSelects = Array.from(form.querySelectorAll('[data-product-grid-size-option]'));
+    let isValid = true;
+
+    sizeSelects.forEach((select) => {
+      const error = select.closest('.product-grid-quick-view__option')?.querySelector('[data-product-grid-size-error]');
+      const hasValue = select.value !== '';
+
+      if (error) {
+        error.hidden = hasValue;
+      }
+
+      if (hasValue) {
+        select.removeAttribute('aria-invalid');
+      } else {
+        select.setAttribute('aria-invalid', 'true');
+      }
+
+      isValid = isValid && hasValue;
+    });
+
+    return isValid;
+  };
+
+  document.addEventListener('click', (event) => {
+    const openButton = event.target.closest('[data-product-grid-quick-view-open]');
+
+    if (openButton) {
+      const targetId = openButton.getAttribute('data-product-grid-quick-view-target');
+      const dialog = document.getElementById(targetId);
+
+      if (dialog && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      }
+    }
+
+    const closeButton = event.target.closest('[data-product-grid-quick-view-close]');
+
+    if (closeButton) {
+      const dialog = closeButton.closest('dialog');
+
+      if (dialog) {
+        dialog.close();
+      }
+    }
+
+    if (event.target instanceof HTMLDialogElement && event.target.classList.contains('product-grid-quick-view')) {
+      event.target.close();
+    }
+  });
+
+  document.addEventListener('change', (event) => {
+    const option = event.target.closest('[data-product-grid-option]');
+
+    if (!option) return;
+
+    const form = option.closest('[data-product-grid-quick-view-form]');
+
+    if (form) {
+      if (option.matches('[data-product-grid-size-option]')) {
+        validateQuickViewSize(form);
+      }
+
+      updateQuickViewVariant(form);
+    }
+  });
+
+  document.addEventListener('submit', (event) => {
+    const form = event.target.closest('[data-product-grid-quick-view-form]');
+
+    if (!form) return;
+
+    if (!validateQuickViewSize(form)) {
+      event.preventDefault();
+      form.querySelector('[data-product-grid-size-option][aria-invalid="true"]')?.focus();
+    }
+  });
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Product grid",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop the edit"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment_mobile",
+      "label": "Heading alignment on mobile",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_mobile",
+      "label": "Heading font size on mobile",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "label": "Heading line height",
+      "min": 90,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 115
+    },
+    {
+      "type": "header",
+      "content": "Grid"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Grid gap",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Quick view button"
+    },
+    {
+      "type": "select",
+      "id": "quick_view_button_style",
+      "label": "Add to cart button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "color",
+      "id": "quick_button_background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "quick_button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "range",
+          "id": "quick_button_top",
+          "label": "Button position from top",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "quick_button_left",
+          "label": "Button position from left",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [
+    {
+      "name": "Product grid",
+      "blocks": [
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

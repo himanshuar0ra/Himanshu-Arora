@@ -1,0 +1,210 @@
+{% doc %}
+Renders quick-view content for a selected product in the product grid section.
+@param {product} product - The product to render.
+@param {string} dialog_id - The dialog ID used by the quick-view trigger.
+@param {string} [button_style] - The quick-view add button style.
+@example
+{% render 'product-grid-quick-view', product: product, dialog_id: 'ProductGridQuickView-1' %}
+{% enddoc %}
+
+{% liquid
+  assign product_form_id = dialog_id | append: '-form'
+  assign selected_variant = product.selected_or_first_available_variant
+%}
+
+<dialog
+  id="{{ dialog_id }}"
+  class="product-grid-quick-view"
+  aria-labelledby="{{ dialog_id }}-title"
+>
+  <div class="product-grid-quick-view__inner">
+    <button
+      type="button"
+      class="product-grid-quick-view__close"
+      aria-label="Close quick view"
+      data-product-grid-quick-view-close
+    >
+      &times;
+    </button>
+
+    {% if product.featured_image != blank %}
+      <div class="product-grid-quick-view__media">
+        {{
+          product.featured_image
+          | image_url: width: 240
+          | image_tag:
+            widths: '120, 180, 240',
+            sizes: '120px',
+            alt: product.featured_image.alt | default: product.title,
+            class: 'product-grid-quick-view__image',
+            loading: 'lazy'
+        }}
+      </div>
+    {% endif %}
+
+    <div class="product-grid-quick-view__content">
+      <h3
+        id="{{ dialog_id }}-title"
+        class="product-grid-quick-view__title"
+      >
+        {{ product.title | escape }}
+      </h3>
+
+      <p class="product-grid-quick-view__price">
+        {{ selected_variant.price | money }}
+      </p>
+
+      {% if product.description != blank %}
+        <div class="product-grid-quick-view__description">
+          {{ product.description | strip_html | truncatewords: 28 }}
+        </div>
+      {% endif %}
+
+      </div>
+      </div>
+      {% form 'product', product, id: product_form_id, class: 'product-grid-quick-view__form', data-product-grid-quick-view-form: '' %}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ selected_variant.id }}"
+          data-product-grid-variant-id
+        >
+
+        {% unless product.has_only_default_variant %}
+          <div class="product-grid-quick-view__variants">
+            {% for option in product.options_with_values %}
+              {% liquid
+                assign option_name = option.name | downcase
+                assign is_color_option = false
+                assign is_size_option = false
+                
+                if option_name contains 'size'
+                  assign is_size_option = true
+                endif
+
+                if option_name contains 'color'
+                  assign is_color_option = true
+                endif
+
+                if option_name contains 'colour'
+                  assign is_color_option = true
+                endif
+
+              %}
+
+              {% if is_color_option %}
+                <fieldset class="product-grid-quick-view__option">
+                  <legend class="product-grid-quick-view__option-label">{{ option.name }}</legend>
+                  <div class="product-grid-quick-view__color-options">
+                    {% for value in option.values %}
+                      {% liquid
+                        assign input_id = dialog_id | append: '-option-' | append: option.position | append: '-' | append: forloop.index
+                        assign swatch_color = value.name | downcase | remove: ' '
+                        if value.swatch.color != blank
+                          assign swatch_color = value.swatch.color
+                        endif
+                      %}
+                      <label
+                        class="product-grid-quick-view__color-label"
+                        for="{{ input_id }}"
+                      >
+                        <input
+                          id="{{ input_id }}"
+                          type="radio"
+                          name="options[{{ option.name | escape }}]"
+                          value="{{ value.name | escape }}"
+                          {% if value.selected %}checked{% endif %}
+                          data-product-grid-option
+                          data-option-position="{{ option.position }}"
+                        >
+                        <span
+                          class="product-grid-quick-view__color-swatch"
+                          style="--product-grid-quick-view-swatch: {{ swatch_color }};"
+                        ></span>
+                        <span class="product-grid-quick-view__color-text">{{ value.name }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+              {% elsif is_size_option %}
+                {% liquid
+                  assign size_error_id = dialog_id | append: '-option-' | append: option.position | append: '-error'
+                %}
+                <label class="product-grid-quick-view__option">
+                  <span class="product-grid-quick-view__option-label">{{ option.name }}</span>
+                  <select
+                    class="product-grid-quick-view__select"
+                    name="options[{{ option.name | escape }}]"
+                    data-product-grid-option
+                    data-product-grid-size-option
+                    data-option-position="{{ option.position }}"
+                    aria-describedby="{{ size_error_id }}"
+                  >
+                    <option value="" selected disabled>Choose your size</option>
+                    {% for value in option.values %}
+                      <option
+                        value="{{ value.name | escape }}"
+                      >
+                        {{ value.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  <span
+                    id="{{ size_error_id }}"
+                    class="product-grid-quick-view__option-error"
+                    data-product-grid-size-error
+                    hidden
+                  >
+                    Please choose a size.
+                  </span>
+                </label>
+              {% else %}
+                <label class="product-grid-quick-view__option">
+                  <span class="product-grid-quick-view__option-label">{{ option.name }}</span>
+                  <select
+                    class="product-grid-quick-view__select"
+                    name="options[{{ option.name | escape }}]"
+                    data-product-grid-option
+                    data-option-position="{{ option.position }}"
+                  >
+                    {% for value in option.values %}
+                      <option
+                        value="{{ value.name | escape }}"
+                        {% if value.selected %}selected{% endif %}
+                      >
+                        {{ value.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </label>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endunless %}
+
+        <button
+          type="submit"
+          class="product-grid-quick-view__add-button product-grid-quick-view__add-button--{{ button_style | default: 'secondary' }}"
+          {% unless selected_variant.available %}disabled{% endunless %}
+          data-product-grid-add-button
+        >
+          <span data-product-grid-add-button-label>
+            {% if selected_variant.available %}
+              Add to cart
+            {% else %}
+              Sold out
+            {% endif %}
+          </span>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M0.75 4.77298L7.37629e-08 4.77298L-7.37629e-08 6.27298L0.75 6.27298L0.75 4.77298ZM25.2803 6.05331C25.5732 5.76042 25.5732 5.28554 25.2803 4.99265L20.5074 0.21968C20.2145 -0.073213 19.7396 -0.0732131 19.4467 0.21968C19.1538 0.512574 19.1538 0.987447 19.4467 1.28034L23.6893 5.52298L19.4467 9.76562C19.1538 10.0585 19.1538 10.5334 19.4467 10.8263C19.7396 11.1192 20.2145 11.1192 20.5074 10.8263L25.2803 6.05331ZM0.75 6.27298L24.75 6.27298L24.75 4.77298L0.75 4.77298L0.75 6.27298Z" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <script
+          type="application/json"
+          data-product-grid-variants
+        >
+          {{ product.variants | json }}
+        </script>
+      {% endform %}
+</dialog>

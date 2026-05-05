@@ -1,0 +1,225 @@
+<section
+  class="custom-rich-text"
+  style="
+    --custom-rich-text-background: {{ section.settings.background_color }};
+    --custom-rich-text-color: {{ section.settings.text_color }};
+    --custom-rich-text-size: {{ section.settings.font_size }}px;
+    --custom-rich-text-size-mobile: {{ section.settings.font_size_mobile }}px;
+    --custom-rich-text-weight: {{ section.settings.font_weight }};
+    --custom-rich-text-line-height: {{ section.settings.line_height | divided_by: 100.0 }};
+    --custom-rich-text-max-width: {{ section.settings.content_max_width }}px;
+    --custom-rich-text-padding-top: {{ section.settings.padding_top }}px;
+    --custom-rich-text-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="custom-rich-text__inner custom-rich-text__inner--{{ section.settings.section_width }}">
+    {% if section.settings.text != blank %}
+      <div class="custom-rich-text__content custom-rich-text__content--{{ section.settings.text_alignment }}">
+        {{ section.settings.text }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .custom-rich-text {
+    background-color: var(--custom-rich-text-background);
+  }
+
+  .custom-rich-text__inner {
+    padding-block-start: var(--custom-rich-text-padding-top);
+    padding-block-end: var(--custom-rich-text-padding-bottom);
+  }
+
+  .custom-rich-text__inner--page-width {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--page-margin);
+  }
+
+  .custom-rich-text__inner--full-width {
+    padding-inline: var(--page-margin);
+  }
+
+  .custom-rich-text__content {
+    max-width: var(--custom-rich-text-max-width);
+    color: var(--custom-rich-text-color);
+    font-size: var(--custom-rich-text-size);
+    font-weight: var(--custom-rich-text-weight);
+    line-height: var(--custom-rich-text-line-height);
+    letter-spacing: 0;
+  }
+
+  .custom-rich-text__content--left {
+    margin-inline-end: auto;
+    text-align: left;
+  }
+
+  .custom-rich-text__content--center {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .custom-rich-text__content--right {
+    margin-inline-start: auto;
+    text-align: right;
+  }
+
+  .custom-rich-text__content > * {
+    margin: 0;
+  }
+
+  .custom-rich-text__content > * + * {
+    margin-block-start: 0.75em;
+  }
+
+  @media screen and (max-width: 749px) {
+    .custom-rich-text__content {
+      font-size: var(--custom-rich-text-size-mobile);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Custom rich text",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        {
+          "value": "page-width",
+          "label": "Page width"
+        },
+        {
+          "value": "full-width",
+          "label": "Full width"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content max width",
+      "min": 320,
+      "max": 1400,
+      "step": 20,
+      "unit": "px",
+      "default": 980
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Mobile font size",
+      "min": 12,
+      "max": 80,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "font_weight",
+      "label": "Font weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "line_height",
+      "label": "Line height",
+      "min": 90,
+      "max": 220,
+      "step": 5,
+      "unit": "%",
+      "default": 130
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom rich text"
+    }
+  ]
+}
+{% endschema %}
